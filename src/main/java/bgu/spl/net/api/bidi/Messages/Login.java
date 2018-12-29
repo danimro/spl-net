@@ -33,10 +33,10 @@ public class Login extends Message {
         int index = 0;
         index = insertArray(opcode, output, index);
         index = insertArray(usernameBytes, output, index);
-        output[index] = 0;
+        output[index] = '\0';
         index++;
         index = insertArray(passwordBytes, output, index);
-        output[index] = 0;
+        output[index] = '\0';
         return output;
     }
 

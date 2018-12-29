@@ -23,7 +23,7 @@ public class Stat extends Message{
         int index = 0;
         index = insertArray(opcode,output,index);
         index = insertArray(userNameBytes,output,index);
-        output[index] = 0;
+        output[index] = '\0';
         return output;
     }
 

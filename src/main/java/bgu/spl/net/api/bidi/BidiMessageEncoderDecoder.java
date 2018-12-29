@@ -3,10 +3,13 @@ package bgu.spl.net.api.bidi;
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.bidi.Messages.*;
 
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Vector;
 
 
-public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message> {
+public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message> {
 
     private byte[] opcodeBytes;
 
@@ -27,7 +30,7 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     private Message.Opcode currentOpcode;
 
-    public bidiMessageEncoderDecoder() {
+    public BidiMessageEncoderDecoder() {
         this.opcodeBytes = new byte[2];
         this.opcodeInsertedLength = 0;
         this.currentOpcode = null;
@@ -100,7 +103,7 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         // field1 = username
         Message output;
         insertByteToField1(nextByte);
-        if(nextByte == 0){
+        if(nextByte == '\0'){
             checkReduceField1();
             String username = new String(this.field1, StandardCharsets.UTF_8);
             output = new Stat(username);
@@ -120,7 +123,7 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         if(this.zeroCounter == 0){
             //inserting to username
             insertByteToField1(nextByte);
-            if(nextByte == 0){
+            if(nextByte == '\0'){
                 this.zeroCounter++;
             }
             return null;
@@ -128,7 +131,7 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         else{
             //inserting content
             insertByteToField2(nextByte);
-            if(nextByte == 0){
+            if(nextByte == '\0'){
                 output = generatePMMessage();
                 this.generalVariablesReset();
             }
@@ -154,7 +157,7 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         //field1 = content
         Message output;
         this.insertByteToField1(nextByte);
-        if(nextByte == 0){
+        if(nextByte == '\0'){
             //finished reading the message
             checkReduceField1();
             String content = new String(this.field1, StandardCharsets.UTF_8);
@@ -177,14 +180,14 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             this.zeroCounter++;
             return null;
         }
-        else if(this.zeroCounter>0 && this.zeroCounter<3){
+        else if((this.zeroCounter > 0) && (this.zeroCounter < 3)){
             insertToNumberOfUsers(nextByte);
             return null;
         }
         else{
             int numberOfUsers = Message.bytesToShort(this.field1);
             insertByteToField2(nextByte);
-            if(nextByte == 0){
+            if(nextByte == '\0'){
                 this.zeroCounter++;
                 //to reduce the first three bytes of the follow\unfollow and numberOfUsers bytes
                 if(this.zeroCounter-3 == numberOfUsers){
@@ -214,7 +217,18 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     private Message generateFollowMessage(int numberOfUsers) {
         Message output;//collected all the necessary users --> convert them to string and generate a FollowMessage
         checkReduceField2();
-        String allUsers = new String(this.field2, StandardCharsets.UTF_8);
+        Vector<String> allUsers = new Vector<>();
+        int start = 0;
+        for(int i = 0; i < field2Index; i++){
+            if(field2[i] == '\0'){
+                //finished a single user;
+                byte[] userByte = Arrays.copyOfRange(field2,start,i);
+                String user = new String (userByte,StandardCharsets.UTF_8);
+                allUsers.add(user);
+                start = i + 1;
+            }
+
+        }
         output = new Follow(this.followByte, numberOfUsers, allUsers);
         generalVariablesReset();
         return output;
@@ -225,7 +239,7 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         if(this.zeroCounter == 0){
             insertByteToField1(nextByte);
             //the next byte going to be to the userName
-            if(nextByte == 0){
+            if(nextByte == '\0'){
                 checkReduceField1();
                 this.zeroCounter++;
                 return null;
@@ -234,7 +248,7 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         }
         else{
             insertByteToField2(nextByte);
-            if(nextByte == 0){
+            if(nextByte == '\0'){
                 checkReduceField2();
                 //creating the Register or Login Message
                 return generateRegisterOrLoginMessage(outputOpcode);

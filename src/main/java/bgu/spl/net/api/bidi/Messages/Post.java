@@ -19,7 +19,7 @@ public class Post extends Message {
     public byte[] convertMessageToBytes() {
         byte[] opcode = this.shortToBytes(this.opcode.getCode());
         byte[] contentsBytes = this.content.getBytes(StandardCharsets.UTF_8);
-        byte[] separator = {0};
+        byte[] separator = {'\0'};
         byte[] output = new byte[opcode.length + contentsBytes.length + separator.length];
         int index = 0;
         index = insertArray(opcode, output, index);

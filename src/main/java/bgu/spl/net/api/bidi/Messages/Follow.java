@@ -15,18 +15,16 @@ public class Follow extends Message {
 
 
 
-    public Follow(byte isFollowing, int numberOfUsers, String users) {
+    public Follow(byte isFollowing, int numberOfUsers, List<String> users) {
         this.opcode = Opcode.FOLLOW;
-        if(isFollowing == 0){
+        if(isFollowing == '\0'){
             this.isFollowing = true;
         }
         else{
             this.isFollowing = false;
         }
         this.numberOfUsers = numberOfUsers;
-        this.users = new Vector<>();
-        String[] usersArray = users.split("0");
-        this.users.addAll(Arrays.asList(usersArray));
+        this.users = users;
 
     }
 
@@ -47,10 +45,10 @@ public class Follow extends Message {
         byte[] opcode = this.shortToBytes(this.opcode.getCode());
         byte[] isFollowingBytes = new byte[1];
         if(isFollowing){
-            isFollowingBytes[0] = 0;
+            isFollowingBytes[0] = '\0';
         }
         else{
-            isFollowingBytes[0] = 1;
+            isFollowingBytes[0] = '\1';
         }
         byte[] numberOfUsersBytes = this.shortToBytes((short)this.numberOfUsers);
         Vector<byte[]> usersNames = new Vector<>();
@@ -68,7 +66,7 @@ public class Follow extends Message {
         index = insertArray(numberOfUsersBytes,output,index);
         for (byte[] currentUser:usersNames) {
             index = insertArray(currentUser,output,index);
-            output[index] = 0;
+            output[index] = '\0';
             index++;
         }
         return output;
@@ -81,18 +79,18 @@ public class Follow extends Message {
         }
         else{
             byte[] numberOfUsers = this.shortToBytes((short)messageElements[0]);
-            String usersList = (String)messageElements[1];
-            String[] users = usersList.split("0");
+            //todo change the input type to List<string>
+            List<String> usersList = (List<String>)messageElements[1];
             int lengthOfUsers = (int)messageElements[0];
             byte[][] elements = new byte[numberOfUsers.length + (lengthOfUsers*2)][];
             int index = 0;
             elements[index] = numberOfUsers;
             index++;
-            for(int i = 0; i < users.length;i++){
-                byte[] toInsert = users[i].getBytes(StandardCharsets.UTF_8);
+            for(String currentUser : usersList){
+                byte[] toInsert = currentUser.getBytes(StandardCharsets.UTF_8);
                 elements[index] = toInsert;
                 index++;
-                byte[] separator = {0};
+                byte[] separator = {'\0'};
                 elements[index] = separator;
                 index++;
             }

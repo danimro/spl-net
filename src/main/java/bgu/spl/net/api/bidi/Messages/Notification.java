@@ -31,10 +31,10 @@ public class Notification extends Message {
         output[index] = privateMessageOrPublicPostBytes;
         index++;
         index = insertArray(postingUserBytes,output,index);
-        output[index] = 0;
+        output[index] = '\0';
         index++;
         index = insertArray(contentBytes,output,index);
-        output[index] = 0;
+        output[index] = '\0';
         return output;
     }
 }
