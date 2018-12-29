@@ -229,7 +229,7 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             }
 
         }
-        output = new Follow(this.followByte, numberOfUsers, allUsers);
+        output = new Follow(this.followByte, (short)numberOfUsers, allUsers);
         generalVariablesReset();
         return output;
     }

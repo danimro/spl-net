@@ -9,13 +9,13 @@ public class Follow extends Message {
 
     private boolean isFollowing;
 
-    private int numberOfUsers;
+    private short numberOfUsers;
 
     private List<String> users;
 
 
 
-    public Follow(byte isFollowing, int numberOfUsers, List<String> users) {
+    public Follow(byte isFollowing, short numberOfUsers, List<String> users) {
         this.opcode = Opcode.FOLLOW;
         if(isFollowing == '\0'){
             this.isFollowing = true;
@@ -32,7 +32,7 @@ public class Follow extends Message {
         return isFollowing;
     }
 
-    public int getNumberOfUsers() {
+    public short getNumberOfUsers() {
         return numberOfUsers;
     }
 
@@ -74,7 +74,7 @@ public class Follow extends Message {
 
     @Override
     public Ack generateAckMessage(Object[] messageElements) {
-        if(messageElements.length != 3){
+        if(messageElements.length != 2){
             throw new IllegalArgumentException("Follow_Message-generateAckMessage : was expecting 3 element in the array");
         }
         else{

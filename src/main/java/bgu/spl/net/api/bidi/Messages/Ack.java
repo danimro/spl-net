@@ -27,15 +27,19 @@ public class Ack extends Message {
         byte[] ackOpcode = this.shortToBytes(this.opcode.getCode());
         byte[] resolvedOpcode = this.shortToBytes(this.resolvedOpcode.getCode());
         int numberOfBytes = 0;
-        for(int i = 0; i<messageElements.length;i++){
-            numberOfBytes+= this.messageElements[i].length;
+        if(this.messageElements != null){
+            for(int i = 0; i<messageElements.length;i++){
+                numberOfBytes+= this.messageElements[i].length;
+            }
         }
         byte[] output = new byte[ackOpcode.length + resolvedOpcode.length + numberOfBytes];
         int index = 0;
         index = insertArray(ackOpcode,output,index);
         index = insertArray(resolvedOpcode,output,index);
-        for(int i = 0; i<messageElements.length;i++){
-            index = insertArray(this.messageElements[i],output,index);
+        if(this.messageElements != null){
+            for(int i = 0; i<messageElements.length;i++){
+                index = insertArray(this.messageElements[i],output,index);
+            }
         }
         return output;
     }
