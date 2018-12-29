@@ -171,6 +171,7 @@ public class bidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     private Message readingFollowMessage(byte nextByte){
         //field1 = numberOfUsers  | field2 = usernameList | followbyte = follow\unfollow | zerocounter = bytesCounter
+        this.field1 = new byte[2];
         if(this.zeroCounter == 0){
             this.followByte = nextByte;
             this.zeroCounter++;
