@@ -15,9 +15,14 @@ public class Follow extends Message {
 
 
 
-    public Follow(boolean isFollowing, int numberOfUsers, String users) {
+    public Follow(byte isFollowing, int numberOfUsers, String users) {
         this.opcode = Opcode.FOLLOW;
-        this.isFollowing = isFollowing;
+        if(isFollowing == 0){
+            this.isFollowing = true;
+        }
+        else{
+            this.isFollowing = false;
+        }
         this.numberOfUsers = numberOfUsers;
         this.users = new Vector<>();
         String[] usersArray = users.split("0");
