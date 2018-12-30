@@ -30,6 +30,8 @@ public abstract class BaseServer<T> implements Server<T> {
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;
 		this.sock = null;
+		this.connectionIdGenerator = new AtomicInteger(1);
+		this.connections = new ConnectionsImpl<>();
     }
 
     @Override
