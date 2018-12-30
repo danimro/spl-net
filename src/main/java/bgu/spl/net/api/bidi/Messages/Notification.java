@@ -18,6 +18,18 @@ public class Notification extends Message {
 
     }
 
+    public char getPrivateMessageOrPublicPost() {
+        return privateMessageOrPublicPost;
+    }
+
+    public String getPostingUser() {
+        return postingUser;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
     @Override
     public byte[] convertMessageToBytes() {
         byte[] opcode = this.shortToBytes(this.opcode.getCode());

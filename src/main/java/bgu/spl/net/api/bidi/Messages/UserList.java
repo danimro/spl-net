@@ -1,6 +1,7 @@
 package bgu.spl.net.api.bidi.Messages;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class UserList extends Message {
 
@@ -21,20 +22,20 @@ public class UserList extends Message {
         }
         else{
             byte[] numOfUsersBytes = this.shortToBytes((short)messageElements[0]);
-            String list = (String)messageElements[1];
-            String[] userList = list.split("0");
-            byte[][] elements = new byte[numOfUsersBytes.length+(2*userList.length)][];
+            List<String> list = (List<String>)messageElements[1];
+            byte[][] elements = new byte[numOfUsersBytes.length+(2 * list.size())][];
             int index = 0;
             elements[index] = numOfUsersBytes;
-            for(int i = 0; i < userList.length; i++){
-                byte[] currentUser = userList[i].getBytes(StandardCharsets.UTF_8);
+            for (String user : list) {
+                byte[] currentUser = user.getBytes(StandardCharsets.UTF_8);
                 elements[index] = currentUser;
                 index++;
-                byte[] separator ={0};
+                byte[] separator = {'\0'};
                 elements[index] = separator;
                 index++;
             }
             return new Ack(this.opcode, elements);
+
         }
     }
 }

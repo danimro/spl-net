@@ -2,8 +2,6 @@ package bgu.spl.net.api.bidi;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.bidi.Messages.*;
-
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Vector;
@@ -173,7 +171,7 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
 
     private Message readingFollowMessage(byte nextByte){
-        //field1 = numberOfUsers  | field2 = usernameList | followbyte = follow\unfollow | zerocounter = bytesCounter
+        //field1 = numberOfUsers  | field2 = usernameList | followbyte = follow \ unfollow | zerocounter = bytesCounter
         this.field1 = new byte[2];
         if(this.zeroCounter == 0){
             this.followByte = nextByte;
@@ -189,7 +187,7 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             insertByteToField2(nextByte);
             if(nextByte == '\0'){
                 this.zeroCounter++;
-                //to reduce the first three bytes of the follow\unfollow and numberOfUsers bytes
+                //to reduce the first three bytes of the follow \ unfollow and numberOfUsers bytes
                 if(this.zeroCounter-3 == numberOfUsers){
                     return generateFollowMessage(numberOfUsers);
                 }

@@ -1,40 +1,71 @@
 package bgu.spl.net.srv.bidi;
 
+import bgu.spl.net.api.bidi.Connections;
+import bgu.spl.net.api.bidi.Messages.Message;
+import bgu.spl.net.api.bidi.Messages.Notification;
 import bgu.spl.net.api.bidi.User;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DataManager {
+
+    private AtomicInteger numberOfUsers;
 
     private ConcurrentHashMap<String, User> namesToRegisteredUsers;
 
     private ConcurrentHashMap<Integer, User> namesToLoginUsers;
 
+    private ReadWriteLock sendOrLogLock;
+
+    private List<Notification> messageHistory;
+
+    private Lock sendLock;
+
+    private Lock logLock;
+
     public DataManager() {
         this.namesToRegisteredUsers = new ConcurrentHashMap<>();
         this.namesToLoginUsers = new ConcurrentHashMap<>();
+        this.sendOrLogLock = new ReentrantReadWriteLock(true);
+        this.sendLock = this.sendOrLogLock.readLock();
+        this.logLock = this.sendOrLogLock.writeLock();
+        this.numberOfUsers = new AtomicInteger(0);
+        this.messageHistory = new Vector<>();
     }
 
     public User getUserByName(String name){
         return this.namesToRegisteredUsers.get(name);
     }
 
-    public void registerUser(User newUser){
-        this.namesToRegisteredUsers.put(newUser.getUserName(), newUser);
+    public void registerUser(String userName, String password){
+        int userNumber = this.generateUserNumber();
+        User newUser = new User(userName,password,userNumber);
+        this.namesToRegisteredUsers.put(userName, newUser);
     }
 
     //todo check if can use ReadWriteLock instead of synchronized
-    public synchronized void loginUser(User toLogin){
+    public void loginUser(User toLogin){
+        this.logLock.lock();
         this.namesToLoginUsers.put(toLogin.getConnId(),toLogin);
+        this.logLock.unlock();
     }
 
-    public synchronized void logoutUser(int connId){
+    public void logoutUser(int connId){
+        this.logLock.lock();
+        this.namesToLoginUsers.get(connId).logout();
         this.namesToLoginUsers.remove(connId);
+        this.logLock.unlock();
     }
 
-    public synchronized boolean loginIsEmpty(){
+    public boolean loginIsEmpty(){
         return this.namesToLoginUsers.isEmpty();
     }
 
@@ -46,11 +77,11 @@ public class DataManager {
         List<String> successful = new Vector<>();
         if(follow){
             for(String currentUser:users){
-                if(this.namesToRegisteredUsers.contains(currentUser)){
-                    if(!toCheck.getFollowing().contains(currentUser)){
-                        toCheck.getFollowing().add(currentUser);
-                        User toEdit = this.namesToRegisteredUsers.get(currentUser);
-                        toEdit.getFollowers().add(toCheck.getUserName());
+                User current = this.namesToRegisteredUsers.get(currentUser);
+                if(current != null){
+                    if(!toCheck.getFollowing().contains(current)){
+                        toCheck.getFollowing().add(current);
+                        current.getFollowers().add(this.namesToRegisteredUsers.get(toCheck.getUserName()));
                         successful.add(currentUser);
                     }
                 }
@@ -59,11 +90,11 @@ public class DataManager {
         else{
             //unfollow
             for(String currentUser:users){
-                if(this.namesToRegisteredUsers.contains(currentUser)){
-                    if(toCheck.getFollowing().contains(currentUser)){
-                        toCheck.getFollowing().remove(currentUser);
-                        User toEdit = this.namesToRegisteredUsers.get(currentUser);
-                        toEdit.getFollowers().remove(toCheck.getUserName());
+                User current = this.namesToRegisteredUsers.get(currentUser);
+                if(current != null){
+                    if(toCheck.getFollowing().contains(current)){
+                        toCheck.getFollowing().remove(current);
+                        current.getFollowers().remove(toCheck);
                         successful.add(currentUser);
                     }
                 }
@@ -73,6 +104,36 @@ public class DataManager {
 
     }
 
+    public void sendNotification(Connections<Message> connections, int connectionID, Notification toSend){
+        this.sendLock.lock();
+        connections.send(connectionID,toSend);
+        this.messageHistory.add(toSend);
+        this.sendLock.unlock();
+    }
+
+    private int generateUserNumber(){
+        return this.numberOfUsers.getAndIncrement();
+    }
+
+    public List<String> returnRegisteredUsers(){
+        List<User> users = new Vector<>(this.namesToRegisteredUsers.values());
+        Collections.sort(users);
+        List<String> registeredUsers = new Vector<>();
+        for (User user:users) {
+            registeredUsers.add(user.getUserName());
+        }
+        return registeredUsers;
+    }
+
+    public short returnNumberOfPosts(String postingUser){
+        short output = 0;
+        for(Notification msg:messageHistory){
+            if((msg.getPrivateMessageOrPublicPost() == '1')|| msg.getPostingUser() == postingUser){
+                output++;
+            }
+        }
+        return output;
+    }
 
 
 

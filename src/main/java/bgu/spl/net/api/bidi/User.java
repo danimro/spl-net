@@ -1,12 +1,14 @@
 package bgu.spl.net.api.bidi;
-
 import bgu.spl.net.api.bidi.Messages.Message;
-
-import java.util.List;
-import java.util.Vector;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class User {
+public class User implements Comparable{
+
+    private static final int DISCONNECTED_ID = -1;
+
+    private int userNum;
 
     private int connId;
 
@@ -14,29 +16,31 @@ public class User {
 
     private String password;
 
-    private List<String> following;
+    private Set<User> following;
 
-    private List<String> followers;
-
-    private List<String> sentMessages;
+    private Set<User> followers;
 
     private volatile boolean isConnected;
 
     private ConcurrentLinkedQueue<Message> waitingMessages;
 
-    public User(int connId, String userName, String password) {
-        this.connId = connId;
+    public User(String userName, String password, int userNum) {
+        this.connId = DISCONNECTED_ID;
         this.userName = userName;
         this.password = password;
         this.isConnected = false;
-        this.following = new Vector<>();
-        this.followers = new Vector<>();
-        this.sentMessages = new Vector<>();
+        this.following = new HashSet<>();
+        this.followers = new HashSet<>();
         this.waitingMessages = new ConcurrentLinkedQueue<>();
+        this.userNum = userNum;
     }
 
     public int getConnId() {
         return connId;
+    }
+
+    public int getUserNum() {
+        return userNum;
     }
 
     public String getUserName() {
@@ -47,16 +51,12 @@ public class User {
         return password;
     }
 
-    public List<String> getFollowing() {
+    public Set<User> getFollowing() {
         return following;
     }
 
-    public List<String> getFollowers() {
+    public Set<User> getFollowers() {
         return followers;
-    }
-
-    public List<String> getSentMessages() {
-        return sentMessages;
     }
 
     public boolean isConnected() {
@@ -67,9 +67,43 @@ public class User {
         return waitingMessages;
     }
 
-    public void setConnected(boolean connected) {
-        isConnected = connected;
+    public void logout(){
+        this.isConnected = false;
+        this.connId = DISCONNECTED_ID;
     }
 
+    public void login(int connId){
+        this.isConnected = true;
+        this.connId = connId;
+    }
+
+
+
+    @Override
+    public int compareTo(Object o) {
+        if(o instanceof User){
+            User other = (User)o;
+            if(other.userNum > this.userNum){
+                return -1;
+            }
+            else if(other.userNum < this.userNum){
+                return 1;
+
+            }
+            else{
+                return 0;
+            }
+        }
+        else{
+            return -1;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userName='" + userName + '\'' +
+                '}';
+    }
 
 }
