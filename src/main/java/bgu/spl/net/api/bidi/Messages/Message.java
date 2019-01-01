@@ -24,7 +24,6 @@ public abstract class Message {
         ACK,
         ERROR;
 
-
         public short getCode(){
             if(this == Opcode.REGISTER){
                return 1;

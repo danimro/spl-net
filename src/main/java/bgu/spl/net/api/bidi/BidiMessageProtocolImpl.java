@@ -165,7 +165,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             if (contentWord.contains("@")) {
                 //need to search the tagged user
                 //todo - what happens if the user doesnt exist?
-                String currentUserName = contentWord.substring(1);
+                String currentUserName = contentWord.substring(contentWord.indexOf("@"));
                 User currentUser = this.dataManager.getUserByName(currentUserName);
                 if (currentUser != null) {
                     //only if the Current tagged user is registered
