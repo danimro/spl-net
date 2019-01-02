@@ -6,8 +6,6 @@ public class Ack extends Message {
 
     byte[][] messageElements;
 
-
-
     public Ack(Opcode resolvedOpcode , byte[][] numberOfElements) {
         this.opcode = Opcode.ACK;
         this.resolvedOpcode = resolvedOpcode;
@@ -28,8 +26,8 @@ public class Ack extends Message {
         byte[] resolvedOpcode = this.shortToBytes(this.resolvedOpcode.getCode());
         int numberOfBytes = 0;
         if(this.messageElements != null){
-            for(int i = 0; i<messageElements.length;i++){
-                numberOfBytes+= this.messageElements[i].length;
+            for(int i = 0; i < messageElements.length;i++){
+                numberOfBytes += this.messageElements[i].length;
             }
         }
         byte[] output = new byte[ackOpcode.length + resolvedOpcode.length + numberOfBytes];
@@ -37,7 +35,7 @@ public class Ack extends Message {
         index = insertArray(ackOpcode,output,index);
         index = insertArray(resolvedOpcode,output,index);
         if(this.messageElements != null){
-            for(int i = 0; i<messageElements.length;i++){
+            for(int i = 0; i < messageElements.length;i++){
                 index = insertArray(this.messageElements[i],output,index);
             }
         }
