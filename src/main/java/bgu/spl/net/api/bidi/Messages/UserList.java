@@ -23,9 +23,10 @@ public class UserList extends Message {
         else{
             byte[] numOfUsersBytes = this.shortToBytes((short)messageElements[0]);
             List<String> list = (List<String>)messageElements[1];
-            byte[][] elements = new byte[numOfUsersBytes.length+(2 * list.size())][];
+            byte[][] elements = new byte[1 + (2 * list.size())][];
             int index = 0;
             elements[index] = numOfUsersBytes;
+            index++;
             for (String user : list) {
                 byte[] currentUser = user.getBytes(StandardCharsets.UTF_8);
                 elements[index] = currentUser;

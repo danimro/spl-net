@@ -81,8 +81,8 @@ public class Follow extends Message {
             byte[] numberOfUsers = this.shortToBytes((short)messageElements[0]);
             //todo change the input type to List<string>
             List<String> usersList = (List<String>)messageElements[1];
-            int lengthOfUsers = (int)messageElements[0];
-            byte[][] elements = new byte[numberOfUsers.length + (lengthOfUsers*2)][];
+            short lengthOfUsers = (short)messageElements[0];
+            byte[][] elements = new byte[1 + (lengthOfUsers*2)][];
             int index = 0;
             elements[index] = numberOfUsers;
             index++;

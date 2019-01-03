@@ -89,7 +89,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             synchronized (toCheck.getWaitingMessages()){
                 for(Message current: toCheck.getWaitingMessages()){
                     //sending to the user all the messages that were waiting for him\her
-                    this.connections.send(toCheck.getConnId(),current);
+                    this.connections.send(this.connectionID,current);
                 }
                 //setting the connection value to true
                 toCheck.login(this.connectionID);
@@ -143,7 +143,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             searchingForUsersInMessage(postMsg, sender, users);
             //adding all the followers of the sender to the list
             users.addAll(sender.getFollowers());
-            Notification toSend = new Notification((byte)'1',sender.getUserName(),postMsg.getContent());
+            Notification toSend = new Notification((byte)1,sender.getUserName(),postMsg.getContent());
             for(User currentUser:users){
                 //send notification to each user
                 if(currentUser.isConnected()){
@@ -155,6 +155,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
                     currentUser.getWaitingMessages().add(toSend);
                 }
             }
+            this.dataManager.addToHistory(toSend);
             this.connections.send(this.connectionID,postMsg.generateAckMessage(new Object[0]));
         }
     }
@@ -164,7 +165,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
         for (String contentWord : contentWords) {
             if (contentWord.contains("@")) {
                 //need to search the tagged user
-                String currentUserName = contentWord.substring(contentWord.indexOf("@"));
+                String currentUserName = contentWord.substring(contentWord.indexOf("@")+1);
                 User currentUser = this.dataManager.getUserByName(currentUserName);
                 if (currentUser != null) {
                     //only if the Current tagged user is registered
@@ -185,8 +186,9 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             this.connections.send(this.connectionID,new Error(pmMsg.getOpcode()));
         }
         else{
-            Notification toSend = new Notification((byte)'\0',sender.getUserName(),pmMsg.getContent());
+            Notification toSend = new Notification((byte)0,sender.getUserName(),pmMsg.getContent());
             this.dataManager.sendNotification(this.connections,recipient.getConnId(),toSend);
+            this.dataManager.addToHistory(toSend);
         }
         this.connections.send(this.connectionID, pmMsg.generateAckMessage(new Object[0]));
     }

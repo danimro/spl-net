@@ -104,10 +104,13 @@ public class DataManager {
 
     }
 
+    public void addToHistory(Notification toSave){
+        this.messageHistory.add(toSave);
+    }
+
     public void sendNotification(Connections<Message> connections, int connectionID, Notification toSend){
         this.sendLock.lock();
         connections.send(connectionID,toSend);
-        this.messageHistory.add(toSend);
         this.sendLock.unlock();
     }
 
@@ -128,7 +131,7 @@ public class DataManager {
     public short returnNumberOfPosts(String postingUser){
         short output = 0;
         for(Notification msg:messageHistory){
-            if((msg.getPrivateMessageOrPublicPost() == '1')|| msg.getPostingUser() == postingUser){
+            if((msg.getPrivateMessageOrPublicPost() == 1) && (msg.getPostingUser().equals(postingUser))){
                 output++;
             }
         }

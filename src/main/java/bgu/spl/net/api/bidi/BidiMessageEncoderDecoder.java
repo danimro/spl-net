@@ -176,8 +176,8 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     private Message readingFollowMessage(byte nextByte){
         //field1 = numberOfUsers  | field2 = usernameList | followbyte = follow \ unfollow | zerocounter = bytesCounter
-        this.field1 = new byte[2];
         if(this.zeroCounter == 0){
+            this.field1 = new byte[2];
             this.followByte = nextByte;
             this.zeroCounter++;
             return null;
@@ -187,7 +187,7 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             return null;
         }
         else{
-            int numberOfUsers = Message.bytesToShort(this.field1);
+            short numberOfUsers = Message.bytesToShort(this.field1);
             insertByteToField2(nextByte);
             if(nextByte == '\0'){
                 this.zeroCounter++;
@@ -282,6 +282,7 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         this.field1Index = 0;
         this.field2Index = 0;
         this.zeroCounter = 0;
+        this.opcodeInsertedLength = 0;
     }
 
 
