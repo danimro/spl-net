@@ -100,7 +100,6 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     private Message readingStatMessage(byte nextByte) {
         // field1 = username
         Message output;
-        insertByteToField1(nextByte);
         if(nextByte == '\0'){
             checkReduceField1();
             String username = new String(this.field1, StandardCharsets.UTF_8);
@@ -108,6 +107,7 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             this.generalVariablesReset();
         }
         else{
+            insertByteToField1(nextByte);
             return null;
         }
         return output;
@@ -120,20 +120,24 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         Message output;
         if(this.zeroCounter == 0){
             //inserting to username
-            insertByteToField1(nextByte);
+
             if(nextByte == '\0'){
                 this.zeroCounter++;
+            }
+            else{
+                insertByteToField1(nextByte);
             }
             return null;
         }
         else{
             //inserting content
-            insertByteToField2(nextByte);
+
             if(nextByte == '\0'){
                 output = generatePMMessage();
                 this.generalVariablesReset();
             }
             else{
+                insertByteToField2(nextByte);
                 return null;
             }
         }
@@ -154,7 +158,6 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     private Message readingPostMessage(byte nextByte) {
         //field1 = content
         Message output;
-        this.insertByteToField1(nextByte);
         if(nextByte == '\0'){
             //finished reading the message
             checkReduceField1();
@@ -163,6 +166,7 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             this.generalVariablesReset();
         }
         else{
+            this.insertByteToField1(nextByte);
             return null;
         }
         return output;
@@ -235,22 +239,23 @@ public class BidiMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     private Message readingRegisterOrLoginMessage(Message.Opcode outputOpcode, byte nextByte) {
         //Field1 = username | Field2 = password
         if(this.zeroCounter == 0){
-            insertByteToField1(nextByte);
             //the next byte going to be to the userName
             if(nextByte == '\0'){
                 checkReduceField1();
                 this.zeroCounter++;
                 return null;
             }
+            insertByteToField1(nextByte);
             return null;
         }
         else{
-            insertByteToField2(nextByte);
+            //the next byte going to be to the password
             if(nextByte == '\0'){
                 checkReduceField2();
                 //creating the Register or Login Message
                 return generateRegisterOrLoginMessage(outputOpcode);
             }
+            insertByteToField2(nextByte);
             return null;
         }
     }

@@ -20,4 +20,9 @@ public class Error extends Message {
         index = insertArray(errorOpcode,output,index);
         return output;
     }
+
+    @Override
+    public Ack generateAckMessage(Object[] messageElements) {
+        return null;
+    }
 }

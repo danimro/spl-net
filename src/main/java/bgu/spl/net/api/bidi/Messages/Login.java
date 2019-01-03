@@ -40,4 +40,8 @@ public class Login extends Message {
         return output;
     }
 
+    @Override
+    public Ack generateAckMessage(Object[] messageElements) {
+        return new Ack(this.opcode,new byte[0][0]);
+    }
 }

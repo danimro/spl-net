@@ -27,4 +27,9 @@ public class Post extends Message {
         index = insertArray(separator, output, index);
         return output;
     }
+
+    @Override
+    public Ack generateAckMessage(Object[] messageElements) {
+        return new Ack(this.opcode,new byte[0][0]);
+    }
 }

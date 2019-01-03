@@ -41,4 +41,8 @@ public class Ack extends Message {
         }
         return output;
     }
+    @Override
+    public Ack generateAckMessage(Object[] messageElements) {
+        return null;
+    }
 }

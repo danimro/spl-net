@@ -126,8 +126,6 @@ public abstract class Message {
         return index;
     }
 
-    public Ack generateAckMessage(Object[] messageElements){
-        return new Ack(this.opcode,new byte[0][0]);
-    }
+    public abstract Ack generateAckMessage(Object[] messageElements);
 
 }

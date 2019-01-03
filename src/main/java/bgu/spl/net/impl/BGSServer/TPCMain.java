@@ -1,22 +1,17 @@
 package bgu.spl.net.impl.BGSServer;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.bidi.BidiMessagingProtocol;
-import bgu.spl.net.impl.echo.EchoProtocol;
-import bgu.spl.net.impl.echo.LineMessageEncoderDecoder;
+import bgu.spl.net.api.bidi.BidiMessageEncoderDecoder;
+import bgu.spl.net.api.bidi.BidiMessageProtocolImpl;
+import bgu.spl.net.api.bidi.Messages.Message;
 import bgu.spl.net.srv.Server;
-
-import java.util.function.Supplier;
+import bgu.spl.net.srv.bidi.DataManager;
 
 public class TPCMain {
     public static void main(String[] args) {
-        Server<String> threadPerClientServer = Server.threadPerClient(Integer.parseInt(args[0]), new Supplier<BidiMessagingProtocol<String>>() {
-                    @Override
-                    public BidiMessagingProtocol<String> get() {
-                        return new EchoProtocol();
-                    }
-                },
-                LineMessageEncoderDecoder::new);
+        DataManager dataManager = new DataManager();
+        Server<Message> threadPerClientServer = Server.threadPerClient(Integer.parseInt(args[0]),
+                () -> new BidiMessageProtocolImpl(dataManager),
+                BidiMessageEncoderDecoder::new);
 
         threadPerClientServer.serve();
     }

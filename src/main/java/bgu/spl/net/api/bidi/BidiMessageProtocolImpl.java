@@ -143,7 +143,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             searchingForUsersInMessage(postMsg, sender, users);
             //adding all the followers of the sender to the list
             users.addAll(sender.getFollowers());
-            Notification toSend = new Notification('1',sender.getUserName(),postMsg.getContent());
+            Notification toSend = new Notification((byte)'1',sender.getUserName(),postMsg.getContent());
             for(User currentUser:users){
                 //send notification to each user
                 if(currentUser.isConnected()){
@@ -155,7 +155,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
                     currentUser.getWaitingMessages().add(toSend);
                 }
             }
-            //todo check if there is an acknowledge message from this kind of message
+            this.connections.send(this.connectionID,postMsg.generateAckMessage(new Object[0]));
         }
     }
 
@@ -164,7 +164,6 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
         for (String contentWord : contentWords) {
             if (contentWord.contains("@")) {
                 //need to search the tagged user
-                //todo - what happens if the user doesnt exist?
                 String currentUserName = contentWord.substring(contentWord.indexOf("@"));
                 User currentUser = this.dataManager.getUserByName(currentUserName);
                 if (currentUser != null) {
@@ -186,10 +185,10 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             this.connections.send(this.connectionID,new Error(pmMsg.getOpcode()));
         }
         else{
-            Notification toSend = new Notification('0',sender.getUserName(),pmMsg.getContent());
+            Notification toSend = new Notification((byte)'\0',sender.getUserName(),pmMsg.getContent());
             this.dataManager.sendNotification(this.connections,recipient.getConnId(),toSend);
         }
-        //todo check if acknowledgment is needed
+        this.connections.send(this.connectionID, pmMsg.generateAckMessage(new Object[0]));
     }
     private void userListFunction(UserList userListMsg){
         User user = this.dataManager.getConnectedUser(this.connectionID);
