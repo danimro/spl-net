@@ -79,25 +79,33 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
     }
 
     private void loginFunction (Login loginMsg){
-        User toCheck = this.dataManager.getUserByName(loginMsg.getUsername());
-        if((toCheck == null) || (!toCheck.getPassword().equals(loginMsg.getPassword())) || (toCheck.isConnected())){
-            //if the user is already registered \ password doesnt match \ is already connected --> return error message.
+        User checkIfAlreadyConnected = this.dataManager.getConnectedUser(this.connectionID);
+        if(checkIfAlreadyConnected != null){
             this.connections.send(this.connectionID,new Error(loginMsg.getOpcode()));
         }
         else{
-
-            synchronized (toCheck.getWaitingMessages()){
-                for(Message current: toCheck.getWaitingMessages()){
-                    //sending to the user all the messages that were waiting for him\her
-                    this.connections.send(this.connectionID,current);
-                }
-                //setting the connection value to true
-                toCheck.login(this.connectionID);
-                this.dataManager.loginUser(toCheck);
-
+            User toCheck = this.dataManager.getUserByName(loginMsg.getUsername());
+            if((toCheck == null) || (!toCheck.getPassword().equals(loginMsg.getPassword())) || (toCheck.isConnected())){
+                //if the user is already registered \ password doesnt match \ is already connected --> return error message.
+                this.connections.send(this.connectionID,new Error(loginMsg.getOpcode()));
             }
-            this.connections.send(connectionID,loginMsg.generateAckMessage(new Object[0]));
+            else{
+
+                synchronized (toCheck.getWaitingMessages()){
+                    for(int i = 0; i < toCheck.getWaitingMessages().size(); i++){
+                        //sending to the user all the messages that were waiting for him\her
+                        Message current = toCheck.getWaitingMessages().poll();
+                        this.connections.send(this.connectionID,current);
+                    }
+                    //setting the connection value to true
+                    toCheck.login(this.connectionID);
+                    this.dataManager.loginUser(toCheck);
+
+                }
+                this.connections.send(connectionID,loginMsg.generateAckMessage(new Object[0]));
+            }
         }
+
 
     }
     private void logoutFunction (Logout logoutMsg){
@@ -187,7 +195,12 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
         }
         else{
             Notification toSend = new Notification((byte)0,sender.getUserName(),pmMsg.getContent());
-            this.dataManager.sendNotification(this.connections,recipient.getConnId(),toSend);
+            if(recipient.isConnected()){
+                this.dataManager.sendNotification(this.connections,recipient.getConnId(),toSend);
+            }
+            else{
+                recipient.getWaitingMessages().add(toSend);
+            }
             this.dataManager.addToHistory(toSend);
         }
         this.connections.send(this.connectionID, pmMsg.generateAckMessage(new Object[0]));
