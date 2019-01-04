@@ -97,7 +97,8 @@ public class Reactor<T> implements Server<T> {
             key.interestOps(ops);
         } else {
             selectorTasks.add(() -> {
-                key.interestOps(ops);
+                if(key.isValid())
+                    key.interestOps(ops);
             });
             selector.wakeup();
         }
@@ -113,6 +114,7 @@ public class Reactor<T> implements Server<T> {
                 clientChan,
                 this);
         int currentId = this.connectionIdGenerator.getAndIncrement();
+        ((ConnectionsImpl)this.connections).addConnection(currentId,handler);
         handler.start(this.connections, currentId);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
