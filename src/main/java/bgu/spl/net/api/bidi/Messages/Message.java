@@ -1,16 +1,22 @@
 package bgu.spl.net.api.bidi.Messages;
 
-
+/**
+ * Abstract Class represents a Message that is send from the server to the client or from the client to the server.
+ */
 public abstract class Message {
 
+    //region Fields
+    /**
+     * Opcode Enum represents the Opcode that defines message type
+     */
     protected Opcode opcode;
 
-    public Opcode getOpcode() {
-        return opcode;
-    }
+    //endregion Fields
 
-    public abstract byte[] convertMessageToBytes();
-
+    //region Opcode Enum
+    /**
+     * Enum to represents the Opcode the defines Each message
+     */
     public enum Opcode {
         REGISTER,
         LOGIN,
@@ -59,11 +65,17 @@ public abstract class Message {
                 //error message
                 return 11;
             }
-
-
         }
-
     }
+    //endregion Opcode Enum
+
+
+
+    /**
+     * Converting a short number to a array of bytes.
+     * @param num           Short number to be converted.
+     * @return      Array of size 2 represents the given number in bytes.
+     */
     public byte[] shortToBytes(short num)
     {
         byte[] bytesArr = new byte[2];
@@ -71,6 +83,18 @@ public abstract class Message {
         bytesArr[1] = (byte)(num & 0xFF);
         return bytesArr;
     }
+
+    //region Getters
+    public Opcode getOpcode() {
+        return opcode;
+    }
+    //endregion Getters
+
+    /**
+     * converting a bytes array to the equivalent short number.
+     * @param byteArr           Bytes array of size 2 to be converted.
+     * @return          Short number which represent the two bytes array.
+     */
     public static short bytesToShort(byte[] byteArr)
     {
         short result = (short)((byteArr[0] & 0xff) << 8);
@@ -78,6 +102,11 @@ public abstract class Message {
         return result;
     }
 
+    /**
+     * Convert the given number to the matching opcode.
+     * @param code              Short number to be converted.
+     * @return          Opcode that is matching the given number.
+     */
     public static Opcode convertToOpcode(short code){
         if(code == 1){
             return Opcode.REGISTER;
@@ -118,6 +147,19 @@ public abstract class Message {
 
     }
 
+    /**
+     * Convert all the data of a certain message to a byte array.
+     * @return      Byte array represent the current message in the right order according to the server protocol
+     */
+    public abstract byte[] convertMessageToBytes();
+
+    /**
+     * Inserting array of bytes into the end of another Array bytes, from the given index.
+     * @param array             Bytes array to insert to the "output" array.
+     * @param output            Bytes array that the "array" is inserting bytes to.
+     * @param index             Integer represent the current next free index to insert the new bytes from .
+     * @return          Integer represent the new free index of the output array after the insertion
+     */
     protected int insertArray(byte[] array, byte[] output, int index) {
         for (int i = 0; i < array.length; i++) {
             output[index] = array[i];
@@ -126,6 +168,11 @@ public abstract class Message {
         return index;
     }
 
+    /**
+     * Generate matching Ack Message to the Current Message according the Message data and server protocol.
+     * @param messageElements               Object array of additional elements to the Ack message
+     * @return              Ack message matching the data of this message according to the server protocol.
+     */
     public abstract Ack generateAckMessage(Object[] messageElements);
 
 }

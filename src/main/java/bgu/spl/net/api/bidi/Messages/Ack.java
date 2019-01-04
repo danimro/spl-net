@@ -1,25 +1,54 @@
 package bgu.spl.net.api.bidi.Messages;
 
+/**
+ * Class represents Ack Messages From server to the client.
+ */
 public class Ack extends Message {
 
+    //region Fields
+    /**
+     * Opcode of the message that was acknowledged by the server.
+     */
     private Opcode resolvedOpcode;
 
+    /**
+     * 2-D array of Bytes Represents additional/Optional Elements to add to the Ack message.
+     */
     byte[][] messageElements;
 
-    public Ack(Opcode resolvedOpcode , byte[][] numberOfElements) {
+    //endregion Fields
+
+    /**
+     * Default Constructor
+     * @param resolvedOpcode            Opcode of the acknowledged message.
+     * @param elements                  2-D array of bytes of elements to add to the Ack message.
+     */
+    public Ack(Opcode resolvedOpcode , byte[][] elements) {
         this.opcode = Opcode.ACK;
         this.resolvedOpcode = resolvedOpcode;
-        this.messageElements = numberOfElements;
+        this.messageElements = elements;
     }
 
+    /**
+     * get the Resolved Message opcode.
+     * @return  Opcode of the Resolved Message of this Ack message.
+     */
     public Opcode getResolvedOpcode() {
         return resolvedOpcode;
     }
 
+    /**
+     * get the Additional elements of this Ack message
+     * @return  2-D Bytes array of the additional elements of this Ack Message
+     */
     public byte[][] getMessageElements() {
         return messageElements;
     }
 
+    /**
+     * Convert all the data of this Ack message to a byte array.
+     * @return      Byte array represent this Ack message in the right order according to the server protocol
+     */
     @Override
     public byte[] convertMessageToBytes() {
         //ack opcode
@@ -46,6 +75,10 @@ public class Ack extends Message {
         }
         return output;
     }
+
+    /**
+     *No need to return an ack message to an ack message.
+     */
     @Override
     public Ack generateAckMessage(Object[] messageElements) {
         return null;
