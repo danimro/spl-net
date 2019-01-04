@@ -175,7 +175,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
                 //need to search the tagged user
                 String currentUserName = contentWord.substring(contentWord.indexOf("@")+1);
                 User currentUser = this.dataManager.getUserByName(currentUserName);
-                if (currentUser != null) {
+                if ((currentUser != null)&&(!users.contains(currentUser))) {
                     //only if the Current tagged user is registered
                     if (!sender.getFollowers().contains(currentUser)) {
                         //only if the current user is not following the sender already
