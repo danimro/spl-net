@@ -90,9 +90,10 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
                 this.connections.send(this.connectionID,new Error(loginMsg.getOpcode()));
             }
             else{
-
+                this.connections.send(connectionID,loginMsg.generateAckMessage(new Object[0]));
                 synchronized (toCheck.getWaitingMessages()){
-                    for(int i = 0; i < toCheck.getWaitingMessages().size(); i++){
+                    int size = toCheck.getWaitingMessages().size();
+                    for(int i = 0; i < size; i++){
                         //sending to the user all the messages that were waiting for him\her
                         Message current = toCheck.getWaitingMessages().poll();
                         this.connections.send(this.connectionID,current);
@@ -102,7 +103,6 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
                     this.dataManager.loginUser(toCheck);
 
                 }
-                this.connections.send(connectionID,loginMsg.generateAckMessage(new Object[0]));
             }
         }
 
@@ -218,8 +218,10 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
         }
     }
     private void statFunction (Stat statMsg){
+        User currentClient = this.dataManager.getConnectedUser(this.connectionID);
         User user = this.dataManager.getUserByName(statMsg.getUsername());
-        if((user == null)|| (!user.isConnected())){
+        if((user == null)||(currentClient == null)){
+            //if the requesting user is not logged in OR if the user in the request does not exist --> send error
             this.connections.send(this.connectionID, new Error(statMsg.getOpcode()));
         }
         else{

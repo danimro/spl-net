@@ -1,7 +1,6 @@
 package bgu.spl.net.api.bidi.Messages;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -79,7 +78,6 @@ public class Follow extends Message {
         }
         else{
             byte[] numberOfUsers = this.shortToBytes((short)messageElements[0]);
-            //todo change the input type to List<string>
             List<String> usersList = (List<String>)messageElements[1];
             short lengthOfUsers = (short)messageElements[0];
             byte[][] elements = new byte[1 + (lengthOfUsers*2)][];
