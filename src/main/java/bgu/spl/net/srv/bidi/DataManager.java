@@ -90,10 +90,12 @@ public class DataManager {
             for(String currentUser:users){
                 User current = this.namesToRegisteredUsers.get(currentUser);
                 if(current != null){
-                    if(!toCheck.getFollowing().contains(current)){
-                        toCheck.getFollowing().add(current);
-                        current.getFollowers().add(this.namesToRegisteredUsers.get(toCheck.getUserName()));
-                        successful.add(currentUser);
+                    synchronized (toCheck){
+                        if(!toCheck.getFollowing().contains(current)){
+                            toCheck.getFollowing().add(current);
+                            current.getFollowers().add(this.namesToRegisteredUsers.get(toCheck.getUserName()));
+                            successful.add(currentUser);
+                        }
                     }
                 }
             }
@@ -103,11 +105,14 @@ public class DataManager {
             for(String currentUser:users){
                 User current = this.namesToRegisteredUsers.get(currentUser);
                 if(current != null){
-                    if(toCheck.getFollowing().contains(current)){
-                        toCheck.getFollowing().remove(current);
-                        current.getFollowers().remove(toCheck);
-                        successful.add(currentUser);
+                    synchronized (toCheck){
+                        if(toCheck.getFollowing().contains(current)){
+                            toCheck.getFollowing().remove(current);
+                            current.getFollowers().remove(toCheck);
+                            successful.add(currentUser);
+                        }
                     }
+
                 }
             }
         }
@@ -150,11 +155,5 @@ public class DataManager {
         }
         return output;
     }
-
-
-
-
-
-
 
 }
