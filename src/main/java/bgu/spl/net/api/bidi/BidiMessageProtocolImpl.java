@@ -6,6 +6,9 @@ import bgu.spl.net.srv.bidi.DataManager;
 
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  {
 
@@ -13,12 +16,18 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
 
     private Connections<Message> connections;
 
-    private DataManager dataManager;
+    private final DataManager dataManager;
+
+    private ReadWriteLock logOrSendLock;
+
+    private ReadWriteLock registerOrUserListLock;
 
     private int connectionID;
 
-    public BidiMessageProtocolImpl(DataManager dataManager) {
+    public BidiMessageProtocolImpl(DataManager dataManager, ReadWriteLock logOrSendLock, ReadWriteLock registerOrUserListLock) {
         this.dataManager = dataManager;
+        this.registerOrUserListLock = registerOrUserListLock;
+        this.logOrSendLock = logOrSendLock;
         this.shouldTerminate = false;
     }
 
@@ -68,6 +77,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
     }
 
     private void registerFunction (Register registerMsg){
+        this.registerOrUserListLock.writeLock().lock();
         if(this.dataManager.getUserByName(registerMsg.getUsername()) != null){
             //if the user is already registered - return error message.
             this.connections.send(this.connectionID,new Error(registerMsg.getOpcode()));
@@ -76,9 +86,11 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             this.dataManager.registerUser(registerMsg.getUsername(),registerMsg.getPassword());
             this.connections.send(this.connectionID,registerMsg.generateAckMessage());
         }
+        this.registerOrUserListLock.writeLock().unlock();
     }
 
     private void loginFunction (Login loginMsg){
+        this.logOrSendLock.writeLock().lock();
         User checkIfAlreadyConnected = this.dataManager.getConnectedUser(this.connectionID);
         if(checkIfAlreadyConnected != null){
             this.connections.send(this.connectionID,new Error(loginMsg.getOpcode()));
@@ -105,20 +117,22 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
                 }
             }
         }
-
-
+        this.logOrSendLock.writeLock().unlock();
     }
+
     private void logoutFunction (Logout logoutMsg){
+        this.logOrSendLock.writeLock().lock();
         if(this.dataManager.loginIsEmpty()){
             this.connections.send(this.connectionID,new Error(logoutMsg.getOpcode()));
         }
         else{
-
             this.dataManager.logoutUser(this.connectionID);
             this.connections.send(this.connectionID,logoutMsg.generateAckMessage());
             this.connections.disconnect(this.connectionID);
         }
+        this.logOrSendLock.writeLock().unlock();
     }
+
     private void followFunction (Follow followMsg){
         User toCheck = this.dataManager.getConnectedUser(this.connectionID);
         if(toCheck == null){
@@ -138,7 +152,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
 
     }
     private void postFunction (Post postMsg){
-
+        this.logOrSendLock.readLock().lock();
         User sender = this.dataManager.getConnectedUser(this.connectionID);
         if(sender == null){
             //the user is not logged in --> send error message
@@ -165,6 +179,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             this.dataManager.addToHistory(toSend);
             this.connections.send(this.connectionID,postMsg.generateAckMessage());
         }
+        this.logOrSendLock.readLock().unlock();
     }
 
     private void searchingForUsersInMessage(Post postMsg, User sender, List<User> users) {
@@ -186,6 +201,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
     }
 
     private void pmFunction (PM pmMsg){
+        this.logOrSendLock.readLock().lock();
         User sender = this.dataManager.getConnectedUser(this.connectionID);
         User recipient = this.dataManager.getUserByName(pmMsg.getUserName());
         if((sender == null) ||(recipient == null)){
@@ -203,8 +219,11 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             this.dataManager.addToHistory(toSend);
         }
         this.connections.send(this.connectionID, pmMsg.generateAckMessage());
+        this.logOrSendLock.readLock().unlock();
     }
+
     private void userListFunction(UserList userListMsg){
+        this.registerOrUserListLock.readLock().lock();
         User user = this.dataManager.getConnectedUser(this.connectionID);
         if(user == null){
             this.connections.send(this.connectionID,new Error(userListMsg.getOpcode()));
@@ -214,7 +233,9 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             Message toSend = userListMsg.generateAckMessage((short)registeredUsers.size(),registeredUsers);
             this.connections.send(this.connectionID,toSend);
         }
+        this.registerOrUserListLock.readLock().unlock();
     }
+
     private void statFunction (Stat statMsg){
         User currentClient = this.dataManager.getConnectedUser(this.connectionID);
         User user = this.dataManager.getUserByName(statMsg.getUsername());
