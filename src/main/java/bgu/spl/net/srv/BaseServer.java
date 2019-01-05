@@ -14,12 +14,19 @@ import java.util.function.Supplier;
 
 public abstract class BaseServer<T> implements Server<T> {
 
-    private ConnectionsImpl<T> connections;
+
     private final int port;
     private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
+    /**
+     * AtomicInteger to give unique id to each new ConnectionHandler.
+     */
     private AtomicInteger connectionIdGenerator;
+    /**
+     * Connections Object that hold and map all the current Connections handlers in the server.
+     */
+    private ConnectionsImpl<T> connections;
 
     public BaseServer(
             int port,
@@ -30,6 +37,7 @@ public abstract class BaseServer<T> implements Server<T> {
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;
 		this.sock = null;
+
 		this.connectionIdGenerator = new AtomicInteger(1);
 		this.connections = new ConnectionsImpl<>();
     }
@@ -50,7 +58,9 @@ public abstract class BaseServer<T> implements Server<T> {
                         clientSock,
                         encdecFactory.get(),
                         protocolFactory.get());
+                //give the current new handler a unique connection id.
                 int connectionID = connectionIdGenerator.getAndIncrement();
+                //add the current connections to the connections object.
                 this.connections.addConnection(connectionID,handler);
                 handler.start(connectionID,connections);
                 execute(handler);

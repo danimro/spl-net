@@ -25,8 +25,13 @@ public class Reactor<T> implements Server<T> {
     private final ActorThreadPool pool;
     private Selector selector;
 
-    //generating connections Id for each new client
+    /**
+     * AtomicInteger to generate a unique connectionID to each new Client.
+     */
     private AtomicInteger connectionIdGenerator;
+    /**
+     * Connections Object to hold and map all the current active ConnectionHandlers in the server.
+     */
     private ConnectionsImpl<T> connections;
 
 

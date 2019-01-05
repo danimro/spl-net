@@ -11,9 +11,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ReactorMain {
     public static void main(String[] args) {
+        //DataBase to hold all the messages and users of the BGSServer.
         DataManager dataManager = new DataManager();
+        //ReadWriteLocks to synchronize different part of the functions in the DataManager
         ReadWriteLock logOrSendLock = new ReentrantReadWriteLock(true);
         ReadWriteLock registerOrUserList = new ReentrantReadWriteLock(true);
+        //creating and activating the Reactor Server
         Server<Message> reactorServer = Server.reactor(Integer.parseInt(args[0]),Integer.parseInt(args[1]),
                 () -> new BidiMessageProtocolImpl(dataManager,logOrSendLock,registerOrUserList),
                 BidiMessageEncoderDecoder::new);

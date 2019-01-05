@@ -118,11 +118,19 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     }
 
 
-    //OUR FUNCTIONS
+    /**
+     * initialising the protocol of this connection Handler with the connection object and this ConnectionHandler unique id.
+     * @param connectionID              Integer represents this ConnectionHandler unique id in the connections objects.
+     * @param connections               Connections Object to reference to the protocol of this ConnectionHandler.
+     */
     public void start(Connections<T> connections, int connectionID){
         protocol.start(connectionID,connections);
     }
 
+    /**
+     * Send the given Message to the Client that connected to this Connection Handler.
+     * @param msg           T object to send to the client.
+     */
     @Override
     public void send(T msg) {
         if (msg != null) {
