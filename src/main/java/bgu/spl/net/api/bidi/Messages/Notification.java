@@ -8,26 +8,31 @@ import java.nio.charset.StandardCharsets;
 public class Notification extends Message {
 
     /**
-     * Byte declaring whether it's a private or public message
+     * Byte declaring whether it's a private or public message.
      */
     private byte privateMessageOrPublicPost;
 
     /**
-     * String represents the user Name who post this message
+     * String represents the user Name who post this message.
      */
     private String postingUser;
 
     /**
-     * String represent the content of this message
+     * String represent the content of this message.
      */
     private String content;
 
+    /**
+     * Default Constructor
+     * @param privateMessageOrPublicPost            Byte declaring whether it's a private or public message.
+     * @param postingUser                           String represents the user Name who post this message.
+     * @param content                               String represent the content of this message.
+     */
     public Notification(byte privateMessageOrPublicPost, String postingUser, String content) {
         this.opcode = Opcode.NOTIFICATION;
         this.privateMessageOrPublicPost = privateMessageOrPublicPost;
         this.postingUser = postingUser;
         this.content = content;
-
     }
 
     //region Getters

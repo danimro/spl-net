@@ -66,9 +66,11 @@ public class Ack extends Message {
         }
         byte[] output = new byte[ackOpcode.length + resolvedOpcode.length + numberOfBytes];
         int index = 0;
+        //inserting op code and resolved opcode to message
         index = insertArray(ackOpcode,output,index);
         index = insertArray(resolvedOpcode,output,index);
         if(this.messageElements != null){
+            //for eac additional message int the array --> add it to the bytes array
             for(int i = 0; i < messageElements.length;i++){
                 index = insertArray(this.messageElements[i],output,index);
             }

@@ -24,8 +24,6 @@ public class Follow extends Message {
     private List<String> users;
     //endregion Fields
 
-
-
     /**
      * Default constructor
      * @param isFollowing           Byte represents whether the client wants to follow or unfollow.
@@ -101,8 +99,6 @@ public class Follow extends Message {
         }
         return output;
     }
-
-
 
     /**
      * Generate matching Ack Message to this Follow Message Message according the Message data and server protocol.

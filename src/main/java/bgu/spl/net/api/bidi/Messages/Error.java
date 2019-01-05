@@ -28,6 +28,7 @@ public class Error extends Message {
      */
     @Override
     public byte[] convertMessageToBytes() {
+        //converting the error message fields to bytes array
         byte[] opcode = this.shortToBytes(this.opcode.getCode());
         byte[] errorOpcode = this.shortToBytes(this.errorMessageOpcode.getCode());
         byte[] output = new byte[opcode.length + errorOpcode.length];
