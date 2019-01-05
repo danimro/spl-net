@@ -74,7 +74,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
         }
         else{
             this.dataManager.registerUser(registerMsg.getUsername(),registerMsg.getPassword());
-            this.connections.send(this.connectionID,registerMsg.generateAckMessage(new Object[0]));
+            this.connections.send(this.connectionID,registerMsg.generateAckMessage());
         }
     }
 
@@ -90,7 +90,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
                 this.connections.send(this.connectionID,new Error(loginMsg.getOpcode()));
             }
             else{
-                this.connections.send(connectionID,loginMsg.generateAckMessage(new Object[0]));
+                this.connections.send(connectionID,loginMsg.generateAckMessage());
                 synchronized (toCheck.getWaitingMessages()){
                     int size = toCheck.getWaitingMessages().size();
                     for(int i = 0; i < size; i++){
@@ -115,7 +115,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
         else{
 
             this.dataManager.logoutUser(this.connectionID);
-            this.connections.send(this.connectionID,logoutMsg.generateAckMessage(new Object[0]));
+            this.connections.send(this.connectionID,logoutMsg.generateAckMessage());
             this.connections.disconnect(this.connectionID);
         }
     }
@@ -132,8 +132,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             }
             else{
                 short amount = (short)successful.size();
-                Object[] elementOfAckMsg = {amount,successful};
-                this.connections.send(this.connectionID,followMsg.generateAckMessage(elementOfAckMsg));
+                this.connections.send(this.connectionID,followMsg.generateAckMessage(amount,successful));
             }
         }
 
@@ -164,7 +163,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
                 }
             }
             this.dataManager.addToHistory(toSend);
-            this.connections.send(this.connectionID,postMsg.generateAckMessage(new Object[0]));
+            this.connections.send(this.connectionID,postMsg.generateAckMessage());
         }
     }
 
@@ -203,7 +202,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             }
             this.dataManager.addToHistory(toSend);
         }
-        this.connections.send(this.connectionID, pmMsg.generateAckMessage(new Object[0]));
+        this.connections.send(this.connectionID, pmMsg.generateAckMessage());
     }
     private void userListFunction(UserList userListMsg){
         User user = this.dataManager.getConnectedUser(this.connectionID);
@@ -212,8 +211,7 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
         }
         else{
             List<String> registeredUsers = this.dataManager.returnRegisteredUsers();
-            Object[] elements = {(short)registeredUsers.size(),registeredUsers};
-            Message toSend = userListMsg.generateAckMessage(elements);
+            Message toSend = userListMsg.generateAckMessage((short)registeredUsers.size(),registeredUsers);
             this.connections.send(this.connectionID,toSend);
         }
     }
@@ -225,11 +223,10 @@ public class BidiMessageProtocolImpl implements BidiMessagingProtocol<Message>  
             this.connections.send(this.connectionID, new Error(statMsg.getOpcode()));
         }
         else{
-            short following = (short)user.getFollowing().size();
-            short followers = (short)user.getFollowers().size();
             short numberOfPosts = this.dataManager.returnNumberOfPosts(user.getUserName());
-            Object[] elements = {numberOfPosts, followers, following};
-            this.connections.send(this.connectionID, statMsg.generateAckMessage(elements));
+            short followers = (short)user.getFollowers().size();
+            short following = (short)user.getFollowing().size();
+            this.connections.send(this.connectionID, statMsg.generateAckMessage(numberOfPosts,followers,following));
         }
 
     }

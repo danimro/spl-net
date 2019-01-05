@@ -27,7 +27,7 @@ public class Reactor<T> implements Server<T> {
 
     //generating connections Id for each new client
     private AtomicInteger connectionIdGenerator;
-    private Connections<T> connections;
+    private ConnectionsImpl<T> connections;
 
 
     private Thread selectorThread;
@@ -114,7 +114,7 @@ public class Reactor<T> implements Server<T> {
                 clientChan,
                 this);
         int currentId = this.connectionIdGenerator.getAndIncrement();
-        ((ConnectionsImpl)this.connections).addConnection(currentId,handler);
+        this.connections.addConnection(currentId,handler);
         handler.start(this.connections, currentId);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }

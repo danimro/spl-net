@@ -43,7 +43,7 @@ public class Error extends Message {
      *No need to return an Ack message to an Error message
      */
     @Override
-    public Ack generateAckMessage(Object[] messageElements) {
+    public Ack generateAckMessage() {
         return null;
     }
 }

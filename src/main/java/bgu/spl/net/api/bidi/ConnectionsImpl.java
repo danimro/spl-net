@@ -8,13 +8,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConnectionsImpl<T> implements Connections<T> {
 
-    private AtomicInteger connectionIdGenerator;
 
-    private Map<Integer,ConnectionHandler> connectionHandlerMap;
+    private Map<Integer,ConnectionHandler<T>> connectionHandlerMap;
 
     public ConnectionsImpl() {
         this.connectionHandlerMap = new HashMap<>();
-        this.connectionIdGenerator  = new AtomicInteger(1);
     }
 
     public void addConnection(int currentId,ConnectionHandler<T> toAdd){
@@ -25,7 +23,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     @Override
     public boolean send(int connectionId, T msg) {
-        ConnectionHandler sender = this.connectionHandlerMap.get(connectionId);
+        ConnectionHandler<T> sender = this.connectionHandlerMap.get(connectionId);
         if(sender == null){
             return false;
         }
@@ -37,7 +35,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     @Override
     public void broadcast(T msg) {
-        for(Map.Entry<Integer, ConnectionHandler> entry:this.connectionHandlerMap.entrySet()) {
+        for(Map.Entry<Integer, ConnectionHandler<T>> entry:this.connectionHandlerMap.entrySet()) {
             if(entry.getValue() != null){
                 entry.getValue().send(msg);
             }

@@ -102,27 +102,23 @@ public class Follow extends Message {
         return output;
     }
 
+
+
     /**
      * Generate matching Ack Message to this Follow Message Message according the Message data and server protocol.
-     * @param messageElements               Object array of additional elements to the Ack message
+     * @param numberOfUsers               Short number represents the amount of users in the given list
+     * @param users                       List of Strings represents the users that were found by the server
      * @return              Ack message matching this Follow Message data of this message according to the server protocol.
      */
-    @Override
-    public Ack generateAckMessage(Object[] messageElements) {
-        if(messageElements.length != 2){
-            //follow message must have number of users and a users list as additional parameters
-            throw new IllegalArgumentException("Follow_Message-generateAckMessage : was expecting 3 element in the array");
-        }
-        else{
+    public Ack generateAckMessage(short numberOfUsers,List<String> users ) {
+
             //converting the number of users to bytes array
-            byte[] numberOfUsers = this.shortToBytes((short)messageElements[0]);
-            List<String> usersList = (List<String>)messageElements[1];
-            short lengthOfUsers = (short)messageElements[0];
-            byte[][] elements = new byte[1 + (lengthOfUsers*2)][];
+            byte[] numberOfUsersBytes = this.shortToBytes(numberOfUsers);
+            byte[][] elements = new byte[1 + (numberOfUsers*2)][];
             int index = 0;
-            elements[index] = numberOfUsers;
+            elements[index] = numberOfUsersBytes;
             index++;
-            for(String currentUser : usersList){
+            for(String currentUser : users){
                 //converting each name in the list to bytes array and add it to the elements array.
                 byte[] toInsert = currentUser.getBytes(StandardCharsets.UTF_8);
                 elements[index] = toInsert;
@@ -133,7 +129,5 @@ public class Follow extends Message {
             }
             Ack output = new Ack(this.opcode, elements);
             return output;
-        }
-
     }
 }

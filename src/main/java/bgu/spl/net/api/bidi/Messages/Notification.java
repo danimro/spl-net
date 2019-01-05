@@ -72,7 +72,7 @@ public class Notification extends Message {
      *No Need to return an Ack Message to a Notification message
      */
     @Override
-    public Ack generateAckMessage(Object[] messageElements) {
+    public Ack generateAckMessage() {
         return null;
     }
 }

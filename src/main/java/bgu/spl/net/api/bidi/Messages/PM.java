@@ -62,13 +62,5 @@ public class PM extends Message {
         return output;
 
     }
-    /**
-     * Generate matching Ack Message to this PM Message Message according the Message data and server protocol.
-     * @param messageElements               Object array of additional elements to the Ack message
-     * @return              Ack message matching this PM Message data of this message according to the server protocol.
-     */
-    @Override
-    public Ack generateAckMessage(Object[] messageElements) {
-        return new Ack(this.opcode,new byte[0][0]);
-    }
+
 }

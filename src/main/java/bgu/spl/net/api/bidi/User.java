@@ -4,7 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class User implements Comparable{
+public class User implements Comparable<User>{
+
 
     private static final int DISCONNECTED_ID = -1;
 
@@ -77,33 +78,9 @@ public class User implements Comparable{
         this.connId = connId;
     }
 
-
-
     @Override
-    public int compareTo(Object o) {
-        if(o instanceof User){
-            User other = (User)o;
-            if(other.userNum > this.userNum){
-                return -1;
-            }
-            else if(other.userNum < this.userNum){
-                return 1;
-
-            }
-            else{
-                return 0;
-            }
-        }
-        else{
-            return -1;
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "userName='" + userName + '\'' +
-                '}';
+    public int compareTo(User user) {
+        return Integer.compare(this.userNum, user.userNum);
     }
 
 }

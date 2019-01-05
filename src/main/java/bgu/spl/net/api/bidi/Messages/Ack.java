@@ -80,7 +80,7 @@ public class Ack extends Message {
      *No need to return an ack message to an ack message.
      */
     @Override
-    public Ack generateAckMessage(Object[] messageElements) {
+    public Ack generateAckMessage() {
         return null;
     }
 }

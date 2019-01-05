@@ -48,26 +48,23 @@ public class Stat extends Message{
 
     /**
      * Generate matching Ack Message to this Stat Message Message according the Message data and server protocol.
-     * @param messageElements               Object array of additional elements to the Ack message
-     * @return              Ack message matching this Stat Message data of this message according to the server protocol.
+     * @param numberOfPosts                     short number represents the number of posts of the requested user.
+     * @param numberOfFollowers                 short number represents the number of followers of the requested user.
+     * @param numberOfFollowing                 short number represents the number of users following of the requested user.
+     * @return        Ack message matching this Stat Message data of this message according to the server protocol.
      */
-    @Override
-    public Ack generateAckMessage(Object[] messageElements) {
-        if(messageElements.length != 3){
-            //Stat ack message must have number of posts, number of followers, and number of following as additional parameters
-            throw new IllegalArgumentException("Stat_Message-generateAck: expected 3 elements got : "+messageElements.length);
-        }
-        else{
+    public Ack generateAckMessage(short numberOfPosts, short numberOfFollowers,  short numberOfFollowing) {
+
             //converting the number of posts, number of followers and number of following to bytes arrays.
-            byte[] numberOfPosts = this.shortToBytes((short)messageElements[0]);
-            byte[] numberOfFollowers = this.shortToBytes((short)messageElements[1]);
-            byte[] numberOfFollowing = this.shortToBytes((short)messageElements[2]);
+            byte[] numberOfPostsBytes = this.shortToBytes(numberOfPosts);
+            byte[] numberOfFollowersBytes = this.shortToBytes(numberOfFollowers);
+            byte[] numberOfFollowingBytes = this.shortToBytes(numberOfFollowing);
             byte[][] elements = new byte[3][];
             //inserting all the array to the elements 2-D array of bytes
-            elements[0] = numberOfPosts;
-            elements[1] = numberOfFollowers;
-            elements[2] = numberOfFollowing;
+            elements[0] = numberOfPostsBytes;
+            elements[1] = numberOfFollowersBytes;
+            elements[2] = numberOfFollowingBytes;
             return new Ack(this.opcode,elements);
-        }
+
     }
 }
