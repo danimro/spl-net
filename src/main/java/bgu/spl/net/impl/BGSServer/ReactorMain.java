@@ -17,7 +17,7 @@ public class ReactorMain {
         ReadWriteLock logOrSendLock = new ReentrantReadWriteLock(true);
         ReadWriteLock registerOrUserList = new ReentrantReadWriteLock(true);
         //creating and activating the Reactor Server
-        Server<Message> reactorServer = Server.reactor(Integer.parseInt(args[0]),Integer.parseInt(args[1]),
+        Server<Message> reactorServer = Server.reactor(Integer.parseInt(args[1]),Integer.parseInt(args[0]),
                 () -> new BidiMessageProtocolImpl(dataManager,logOrSendLock,registerOrUserList),
                 BidiMessageEncoderDecoder::new);
 
