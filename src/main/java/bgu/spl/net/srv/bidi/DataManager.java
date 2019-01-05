@@ -23,13 +23,19 @@ public class DataManager {
 
     private ConcurrentHashMap<Integer, User> namesToLoginUsers;
 
-    private ReadWriteLock sendOrLogLock;
-
     private List<Notification> messageHistory;
+
+    private ReadWriteLock sendOrLogLock;
 
     private Lock sendLock;
 
     private Lock logLock;
+
+    private ReadWriteLock registerOrUserListLock;
+
+    private Lock userListLock;
+
+    private Lock registerLock;
 
     public DataManager() {
         this.namesToRegisteredUsers = new ConcurrentHashMap<>();
@@ -37,6 +43,9 @@ public class DataManager {
         this.sendOrLogLock = new ReentrantReadWriteLock(true);
         this.sendLock = this.sendOrLogLock.readLock();
         this.logLock = this.sendOrLogLock.writeLock();
+        this.registerOrUserListLock = new ReentrantReadWriteLock(true);
+        this.userListLock = this.registerOrUserListLock.readLock();
+        this.registerLock = this.registerOrUserListLock.writeLock();
         this.numberOfUsers = new AtomicInteger(0);
         this.messageHistory = new Vector<>();
     }
@@ -46,12 +55,14 @@ public class DataManager {
     }
 
     public void registerUser(String userName, String password){
+        this.registerLock.lock();
         int userNumber = this.generateUserNumber();
         User newUser = new User(userName,password,userNumber);
         this.namesToRegisteredUsers.put(userName, newUser);
+        this.registerLock.unlock();
     }
 
-    //todo check if can use ReadWriteLock instead of synchronized
+
     public void loginUser(User toLogin){
         this.logLock.lock();
         this.namesToLoginUsers.put(toLogin.getConnId(),toLogin);
@@ -119,12 +130,14 @@ public class DataManager {
     }
 
     public List<String> returnRegisteredUsers(){
+        this.userListLock.lock();
         List<User> users = new Vector<>(this.namesToRegisteredUsers.values());
         Collections.sort(users);
         List<String> registeredUsers = new Vector<>();
         for (User user:users) {
             registeredUsers.add(user.getUserName());
         }
+        this.userListLock.unlock();
         return registeredUsers;
     }
 
